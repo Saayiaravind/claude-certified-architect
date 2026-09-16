@@ -41,6 +41,12 @@ lesson. After reviewing, update the "Last synced commit" row above to the new SH
 - **Hands-on every lesson where it makes sense.** A tiny exercise, a JSON schema to write, a
   prompt to design, a bug to spot — something the learner produces, not just reads.
 - **Check for understanding** with a quick question or micro-quiz before moving on.
+- **Full coverage before wrap-up, no exceptions.** Before declaring any lesson done, re-check
+  the source guide section(s) it maps to line-by-line and confirm every subsection/detail was
+  actually taught — not just the headline mechanism. Do **not** rely on the learner to catch
+  missing pieces (happened in L1: the inline `system` role and its placement rules were
+  skipped and the learner had to flag it). If in doubt whether something was covered, re-read
+  the guide section before wrapping, and cover the gap before marking `[x]`.
 - **No lesson ends without updating this file** (checkbox + date + one-line handover note).
 
 ---
@@ -123,6 +129,11 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
   when I said "only two roles" and forgot the inline `system` role/placement rules; don't round
   corners on edge cases for this learner, be precise the first time or expect to be checked.
 - **Known weak spots to revisit before the exam:** none identified yet.
+- **Process correction (2026-09-16):** L1 was initially wrapped up and marked done *before*
+  covering the inline `system` role / placement rules from guide section 1.2 — an omission the
+  learner caught, not the teacher. The teaching contract in section 2 now hard-requires a
+  line-by-line re-check of the source guide section before any lesson is marked `[x]`. Hold
+  every future lesson wrap-up to that bar without being asked.
 - **Continue by saying:** "Let's pick up at L2" (or just say "continue") and teach it per
   the style contract in section 2 — analogy, then mechanism, then a small hands-on check.
 

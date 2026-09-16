@@ -119,7 +119,9 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
   no `tool` role exists — landed near "keeps conversation flow intact," which is adjacent to
   the real answer about strict two-party turn alternation enabling prompt caching). Comfortable
   with JSON. Keep hands-on exercises code/JSON-based rather than purely conceptual — that's
-  where the engagement is highest.
+  where the engagement is highest. **Also actively catches oversimplifications** — pushed back
+  when I said "only two roles" and forgot the inline `system` role/placement rules; don't round
+  corners on edge cases for this learner, be precise the first time or expect to be checked.
 - **Known weak spots to revisit before the exam:** none identified yet.
 - **Continue by saying:** "Let's pick up at L2" (or just say "continue") and teach it per
   the style contract in section 2 — analogy, then mechanism, then a small hands-on check.
@@ -131,4 +133,4 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 | Date | Lesson(s) | Notes |
 |---|---|---|
 | 2026-09-16 | L0 | Tracker created. Repo explored: guide_en.md (~2600 lines) is the canonical English study guide with Part I (13 theory chapters), Part II (5 exam domains), worked questions, and a practice test. Plan of 36 bite-sized lessons drafted above. |
-| 2026-09-16 | L1 | Taught request structure (stateless "actor with amnesia" analogy), message roles, why `tool_result` lives in a `user` message, and `stop_reason` values. Hands-on: learner found the `"role": "tool"` bug in a broken JSON snippet unaided, then reasoned about *why* Anthropic didn't add a `tool` role (close to correct: landed on "keeps the exchange intact" vs. actual answer of strict two-party alternation enabling prompt caching). |
+| 2026-09-16 | L1 | Taught request structure (stateless "actor with amnesia" analogy), message roles, why `tool_result` lives in a `user` message, and `stop_reason` values. Hands-on: learner found the `"role": "tool"` bug in a broken JSON snippet unaided, then reasoned about *why* Anthropic didn't add a `tool` role (close to correct: landed on "keeps the exchange intact" vs. actual answer of strict two-party alternation enabling prompt caching). **Addendum:** learner caught that I'd oversimplified to "only two roles" — corrected to: three roles exist (`user`/`assistant` converse, `system` is a non-conversational instructional overlay, settable top-level or inline-in-`messages` with placement rules, incl. the rule that `system` can never sit between a `tool_use` and its `tool_result`, else 400 error). Learner then correctly identified which of two message sequences violated that rule, unaided. Pattern so far: catches subtleties the teacher glosses over — don't over-simplify roles/edge-cases for this learner, they'll probe them. |

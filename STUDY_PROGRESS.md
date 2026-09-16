@@ -61,7 +61,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 ### Module 1 — Claude API Fundamentals (Guide Ch.1–2)
 - [x] L1. API request structure, message roles, `stop_reason` — 2026-09-16
 - [x] L2. System prompt & the context window (lost-in-the-middle, tool-result bloat) — 2026-09-16
-- [ ] L3. Tools & `tool_use` — what it is, writing good tool descriptions
+- [x] L3. Tools & `tool_use` — what it is, writing good tool descriptions — 2026-09-16
 - [ ] L4. `tool_choice` + JSON schemas for structured output
 - [ ] L5. Syntax vs semantic errors
 
@@ -118,8 +118,8 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 
 ## 4. Handover state (read this first in any new session)
 
-- **Last completed:** L2 — System prompt & the context window (lost-in-the-middle, tool-result bloat).
-- **Next up:** L3 — Tools & `tool_use`, writing good tool descriptions.
+- **Last completed:** L3 — Tools & `tool_use`, writing good tool descriptions.
+- **Next up:** L4 — `tool_choice` + JSON schemas for structured output.
 - **Learner notes so far:** Learns fast and reasons well from first principles (correctly
   spotted the `"role": "tool"` bug on the first try, and independently reasoned toward *why*
   no `tool` role exists — landed near "keeps conversation flow intact," which is adjacent to
@@ -142,6 +142,13 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
   used this lesson to pre-empt a real gap: closed with the "role/constraints/output format"
   purpose-of-system-prompt line that I'd almost skipped again — the full-coverage re-check
   process from the previous correction is working, keep doing it every time before marking `[x]`.
+- **L3 outcome:** learner wrote two mutually-exclusive, bidirectional tool descriptions
+  unaided (the anti-confusion technique most people miss). Gap: "what it returns" stayed vague
+  (said "summary"/"insights" instead of concrete fields like sentiment label + keyword list),
+  and no edge cases were included. Pattern: strong on structural/architectural instincts
+  (mutual exclusion, sequencing), needs a nudge toward *concrete specificity* in the "returns"
+  and "edge cases" checklist items specifically — call this out explicitly each time those two
+  checklist items come up again (JSON schema design in L4 will test this same instinct).
 - **Continue by saying:** "Let's pick up at L2" (or just say "continue") and teach it per
   the style contract in section 2 — analogy, then mechanism, then a small hands-on check.
 
@@ -155,3 +162,4 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 | 2026-09-16 | L1 | Taught request structure (stateless "actor with amnesia" analogy), message roles, why `tool_result` lives in a `user` message, and `stop_reason` values. Hands-on: learner found the `"role": "tool"` bug in a broken JSON snippet unaided, then reasoned about *why* Anthropic didn't add a `tool` role (close to correct: landed on "keeps the exchange intact" vs. actual answer of strict two-party alternation enabling prompt caching). **Addendum:** learner caught that I'd oversimplified to "only two roles" — corrected to: three roles exist (`user`/`assistant` converse, `system` is a non-conversational instructional overlay, settable top-level or inline-in-`messages` with placement rules, incl. the rule that `system` can never sit between a `tool_use` and its `tool_result`, else 400 error). Learner then correctly identified which of two message sequences violated that rule, unaided. Pattern so far: catches subtleties the teacher glosses over — don't over-simplify roles/edge-cases for this learner, they'll probe them. |
 | 2026-09-16 | Q&A (post-L2) | Learner correctly pushed back on the phrase "have the subagent extract the number to a prominent position" — asked how a subagent could know it lost info it never noticed losing. Clarified: lost-in-the-middle is a *reliability* degradation from open-ended summarization/compression, not literal deletion — all tokens remain in context. Real mitigation is upstream: (1) targeted extraction/tool-forced retrieval instead of free-form summarization, (2) chunking so nothing sits deep in a huge window, *then* (3) place the verified fact prominently in the subagent's own output. Style note: for any probabilistic/attention-based failure mode (lost-in-the-middle and similar), always explain the underlying mechanism (is it deletion or reliability?) before giving the mitigation, or it sounds like magic. Add this to how future lessons on context/attention effects are taught. |
 | 2026-09-16 | L2 | Taught system-prompt purpose (role/constraints/output format, priority, loaded once) and the "wording creates unintended tool associations" exam gotcha; then the context window as a fixed-size desk, covering all three named problems (lost-in-the-middle, tool-result accumulation, progressive summarization losing precision). Hands-on: learner rewrote a risky system-prompt line to scope verification to sensitive actions only (clean); on the buried-fact scenario, correctly proposed surfacing the key figure but needed the concept name ("lost-in-the-middle") supplied, and got a nuance correction that you fix your own output's placement, not the fixed source document — this foreshadowed Ch.11's "extract facts into a separate block," flagged as a preview only. |
+| 2026-09-16 | L3 | Taught `tool_use` mechanism (restaurant/kitchen-order analogy: Claude requests, your code executes) and the four-part checklist for good tool descriptions (what it returns, input format/examples, edge cases, when-to-use-vs-alternatives), plus the built-in-tools-vs-MCP-tools competition problem. Hands-on: learner rewrote `analyze_content`/`analyze_document` descriptions with strong bidirectional mutual-exclusion framing (unaided); feedback given on making "what it returns" and edge cases concrete rather than vague. |

@@ -60,7 +60,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 
 ### Module 1 — Claude API Fundamentals (Guide Ch.1–2)
 - [x] L1. API request structure, message roles, `stop_reason` — 2026-09-16
-- [ ] L2. System prompt & the context window (lost-in-the-middle, tool-result bloat)
+- [x] L2. System prompt & the context window (lost-in-the-middle, tool-result bloat) — 2026-09-16
 - [ ] L3. Tools & `tool_use` — what it is, writing good tool descriptions
 - [ ] L4. `tool_choice` + JSON schemas for structured output
 - [ ] L5. Syntax vs semantic errors
@@ -118,8 +118,8 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 
 ## 4. Handover state (read this first in any new session)
 
-- **Last completed:** L1 — API request structure, message roles, `stop_reason`.
-- **Next up:** L2 — System prompt & the context window (lost-in-the-middle, tool-result bloat).
+- **Last completed:** L2 — System prompt & the context window (lost-in-the-middle, tool-result bloat).
+- **Next up:** L3 — Tools & `tool_use`, writing good tool descriptions.
 - **Learner notes so far:** Learns fast and reasons well from first principles (correctly
   spotted the `"role": "tool"` bug on the first try, and independently reasoned toward *why*
   no `tool` role exists — landed near "keeps conversation flow intact," which is adjacent to
@@ -134,6 +134,14 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
   learner caught, not the teacher. The teaching contract in section 2 now hard-requires a
   line-by-line re-check of the source guide section before any lesson is marked `[x]`. Hold
   every future lesson wrap-up to that bar without being asked.
+- **L2 outcome:** learner correctly scoped the system-prompt fix to sensitive actions only
+  (Part A, no gaps). On Part B, correctly proposed the *mitigation* (surface the key figure
+  prominently) but didn't name the underlying problem ("lost-in-the-middle") explicitly — flag
+  this pattern: strong practical/solution instincts, but push for precise terminology recall too,
+  since exam questions will hinge on naming the right concept, not just describing a fix. Also
+  used this lesson to pre-empt a real gap: closed with the "role/constraints/output format"
+  purpose-of-system-prompt line that I'd almost skipped again — the full-coverage re-check
+  process from the previous correction is working, keep doing it every time before marking `[x]`.
 - **Continue by saying:** "Let's pick up at L2" (or just say "continue") and teach it per
   the style contract in section 2 — analogy, then mechanism, then a small hands-on check.
 
@@ -145,3 +153,4 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 |---|---|---|
 | 2026-09-16 | L0 | Tracker created. Repo explored: guide_en.md (~2600 lines) is the canonical English study guide with Part I (13 theory chapters), Part II (5 exam domains), worked questions, and a practice test. Plan of 36 bite-sized lessons drafted above. |
 | 2026-09-16 | L1 | Taught request structure (stateless "actor with amnesia" analogy), message roles, why `tool_result` lives in a `user` message, and `stop_reason` values. Hands-on: learner found the `"role": "tool"` bug in a broken JSON snippet unaided, then reasoned about *why* Anthropic didn't add a `tool` role (close to correct: landed on "keeps the exchange intact" vs. actual answer of strict two-party alternation enabling prompt caching). **Addendum:** learner caught that I'd oversimplified to "only two roles" — corrected to: three roles exist (`user`/`assistant` converse, `system` is a non-conversational instructional overlay, settable top-level or inline-in-`messages` with placement rules, incl. the rule that `system` can never sit between a `tool_use` and its `tool_result`, else 400 error). Learner then correctly identified which of two message sequences violated that rule, unaided. Pattern so far: catches subtleties the teacher glosses over — don't over-simplify roles/edge-cases for this learner, they'll probe them. |
+| 2026-09-16 | L2 | Taught system-prompt purpose (role/constraints/output format, priority, loaded once) and the "wording creates unintended tool associations" exam gotcha; then the context window as a fixed-size desk, covering all three named problems (lost-in-the-middle, tool-result accumulation, progressive summarization losing precision). Hands-on: learner rewrote a risky system-prompt line to scope verification to sensitive actions only (clean); on the buried-fact scenario, correctly proposed surfacing the key figure but needed the concept name ("lost-in-the-middle") supplied, and got a nuance correction that you fix your own output's placement, not the fixed source document — this foreshadowed Ch.11's "extract facts into a separate block," flagged as a preview only. |

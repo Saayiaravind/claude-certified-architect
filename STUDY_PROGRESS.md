@@ -62,7 +62,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 - [x] L1. API request structure, message roles, `stop_reason` — 2026-09-16
 - [x] L2. System prompt & the context window (lost-in-the-middle, tool-result bloat) — 2026-09-16
 - [x] L3. Tools & `tool_use` — what it is, writing good tool descriptions — 2026-09-16
-- [ ] L4. `tool_choice` + JSON schemas for structured output
+- [x] L4. `tool_choice` + JSON schemas for structured output — 2026-09-16
 - [ ] L5. Syntax vs semantic errors
 
 ### Module 2 — Claude Agent SDK (Guide Ch.3)
@@ -118,8 +118,8 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 
 ## 4. Handover state (read this first in any new session)
 
-- **Last completed:** L3 — Tools & `tool_use`, writing good tool descriptions.
-- **Next up:** L4 — `tool_choice` + JSON schemas for structured output.
+- **Last completed:** L4 — `tool_choice` + JSON schemas for structured output.
+- **Next up:** L5 — Syntax vs semantic errors (short lesson, closes out Ch.1–2 / Module 1).
 - **Learner notes so far:** Learns fast and reasons well from first principles (correctly
   spotted the `"role": "tool"` bug on the first try, and independently reasoned toward *why*
   no `tool` role exists — landed near "keeps conversation flow intact," which is adjacent to
@@ -149,6 +149,20 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
   (mutual exclusion, sequencing), needs a nudge toward *concrete specificity* in the "returns"
   and "edge cases" checklist items specifically — call this out explicitly each time those two
   checklist items come up again (JSON schema design in L4 will test this same instinct).
+- **L4 outcome:** Part A (`tool_choice`) — got the forced-first-step half right immediately
+  (`{"type":"tool","name":...}`), but initially answered `"any"` for the free-choice-or-skip
+  steps; self-corrected to `"auto"` once shown that `"any"` still forces a call every time,
+  which contradicted their own "call neither if not applicable" requirement — good, fast
+  self-correction once the contradiction was pointed out, not just told the answer. Part B
+  (schema) — independently reasoned all the way to the *correct* answer on both hard parts
+  (sentiment ambiguity needs an escape-hatch value; the "why" field should be nullable and
+  conditionally populated) but expressed it as uncertainty ("I don't know") rather than
+  committing — the instinct is already right, the gap is confidence/decisiveness in schema
+  design, not correctness. Concretely resolved by teaching the `null` (no signal at all) vs.
+  `"unclear"` enum value (signal present but ambiguous) distinction, which mapped exactly onto
+  the case they'd already spotted. Keep giving this learner problems with a genuine gray area
+  and let them surface the ambiguity themselves before naming the concept — that's clearly how
+  they learn best, confirmed again after the L2 lost-in-the-middle pattern.
 - **Continue by saying:** "Let's pick up at L2" (or just say "continue") and teach it per
   the style contract in section 2 — analogy, then mechanism, then a small hands-on check.
 
@@ -163,6 +177,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 | 2026-09-16 | Q&A (post-L2) | Learner correctly pushed back on the phrase "have the subagent extract the number to a prominent position" — asked how a subagent could know it lost info it never noticed losing. Clarified: lost-in-the-middle is a *reliability* degradation from open-ended summarization/compression, not literal deletion — all tokens remain in context. Real mitigation is upstream: (1) targeted extraction/tool-forced retrieval instead of free-form summarization, (2) chunking so nothing sits deep in a huge window, *then* (3) place the verified fact prominently in the subagent's own output. Style note: for any probabilistic/attention-based failure mode (lost-in-the-middle and similar), always explain the underlying mechanism (is it deletion or reliability?) before giving the mitigation, or it sounds like magic. Add this to how future lessons on context/attention effects are taught. |
 | 2026-09-16 | L2 | Taught system-prompt purpose (role/constraints/output format, priority, loaded once) and the "wording creates unintended tool associations" exam gotcha; then the context window as a fixed-size desk, covering all three named problems (lost-in-the-middle, tool-result accumulation, progressive summarization losing precision). Hands-on: learner rewrote a risky system-prompt line to scope verification to sensitive actions only (clean); on the buried-fact scenario, correctly proposed surfacing the key figure but needed the concept name ("lost-in-the-middle") supplied, and got a nuance correction that you fix your own output's placement, not the fixed source document — this foreshadowed Ch.11's "extract facts into a separate block," flagged as a preview only. |
 | 2026-09-16 | L3 | Taught `tool_use` mechanism (restaurant/kitchen-order analogy: Claude requests, your code executes) and the four-part checklist for good tool descriptions (what it returns, input format/examples, edge cases, when-to-use-vs-alternatives), plus the built-in-tools-vs-MCP-tools competition problem. Hands-on: learner rewrote `analyze_content`/`analyze_document` descriptions with strong bidirectional mutual-exclusion framing (unaided); feedback given on making "what it returns" and edge cases concrete rather than vague. Learner then asked for the fully-fixed ideal version — captured below in section 6 as a standing reference. |
+| 2026-09-16 | L4 | Taught `tool_choice` (phone-support-rep analogy: `auto`/`any`/forced-specific-tool) including the per-request-not-global-policy nuance, and JSON schema design (fill-in-the-blanks-form-with-grammar-checker-but-no-lie-detector analogy: syntax guaranteed, semantics not; required-vs-nullable; enum `"other"`; enum `"unclear"`). Hands-on: Part A — learner got the forced-first-step tool_choice right immediately, briefly picked `"any"` for the free-choice steps then self-corrected to `"auto"` once shown the contradiction with "call neither if not applicable." Part B — designed a support-ticket schema; independently surfaced the sentiment-ambiguity and conditional-"why"-field issues before being taught the terms for them, landing on correct instincts (escape-hatch value; nullable field) while expressing them as uncertainty. Taught the `null` (no signal) vs. `"unclear"` (signal present but ambiguous) distinction to resolve it — mapped directly onto the ambiguity they'd already spotted. Full worked schema saved in section 6. |
 
 ---
 
@@ -214,3 +229,33 @@ cases, (4) when to use vs. the alternative — bidirectionally.
 insights"); edge cases resolve to a defined default instead of an error, so the agent doesn't
 retry wildly or hallucinate; and the "when to use vs. the other tool" sentence is written in
 *both* descriptions, not just one.
+
+### 6.2 Schema design: `null` vs. `"unclear"` (from L4)
+
+Support-ticket extraction schema, illustrating required-vs-nullable decisions and the two
+different "I'm not sure" mechanisms:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "category": { "type": "string", "enum": ["bug", "feature", "billing", "other"] },
+    "urgency": { "type": "string", "enum": ["low", "medium", "high"] },
+    "customer_sentiment": {
+      "type": "string",
+      "enum": ["satisfied", "neutral", "frustrated", "angry", "unclear"],
+      "description": "Use 'unclear' when tone is ambiguous or contradictory, rather than guessing."
+    },
+    "reason_detail": {
+      "type": ["string", "null"],
+      "description": "Free-text explanation. Populate only if category is 'other' or sentiment is 'frustrated'/'angry'; null otherwise."
+    }
+  },
+  "required": ["category", "urgency", "customer_sentiment"]
+}
+```
+
+**The rule to memorize:** `null` = no signal exists at all (the field genuinely doesn't
+apply). An enum value like `"unclear"` = signal exists but is ambiguous/contradictory — the
+model looked and honestly couldn't decide. Don't reach for `null` when what you actually mean
+is "I saw something, but it was confusing" — that case gets its own enum value instead.

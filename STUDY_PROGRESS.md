@@ -162,4 +162,55 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 | 2026-09-16 | L1 | Taught request structure (stateless "actor with amnesia" analogy), message roles, why `tool_result` lives in a `user` message, and `stop_reason` values. Hands-on: learner found the `"role": "tool"` bug in a broken JSON snippet unaided, then reasoned about *why* Anthropic didn't add a `tool` role (close to correct: landed on "keeps the exchange intact" vs. actual answer of strict two-party alternation enabling prompt caching). **Addendum:** learner caught that I'd oversimplified to "only two roles" — corrected to: three roles exist (`user`/`assistant` converse, `system` is a non-conversational instructional overlay, settable top-level or inline-in-`messages` with placement rules, incl. the rule that `system` can never sit between a `tool_use` and its `tool_result`, else 400 error). Learner then correctly identified which of two message sequences violated that rule, unaided. Pattern so far: catches subtleties the teacher glosses over — don't over-simplify roles/edge-cases for this learner, they'll probe them. |
 | 2026-09-16 | Q&A (post-L2) | Learner correctly pushed back on the phrase "have the subagent extract the number to a prominent position" — asked how a subagent could know it lost info it never noticed losing. Clarified: lost-in-the-middle is a *reliability* degradation from open-ended summarization/compression, not literal deletion — all tokens remain in context. Real mitigation is upstream: (1) targeted extraction/tool-forced retrieval instead of free-form summarization, (2) chunking so nothing sits deep in a huge window, *then* (3) place the verified fact prominently in the subagent's own output. Style note: for any probabilistic/attention-based failure mode (lost-in-the-middle and similar), always explain the underlying mechanism (is it deletion or reliability?) before giving the mitigation, or it sounds like magic. Add this to how future lessons on context/attention effects are taught. |
 | 2026-09-16 | L2 | Taught system-prompt purpose (role/constraints/output format, priority, loaded once) and the "wording creates unintended tool associations" exam gotcha; then the context window as a fixed-size desk, covering all three named problems (lost-in-the-middle, tool-result accumulation, progressive summarization losing precision). Hands-on: learner rewrote a risky system-prompt line to scope verification to sensitive actions only (clean); on the buried-fact scenario, correctly proposed surfacing the key figure but needed the concept name ("lost-in-the-middle") supplied, and got a nuance correction that you fix your own output's placement, not the fixed source document — this foreshadowed Ch.11's "extract facts into a separate block," flagged as a preview only. |
-| 2026-09-16 | L3 | Taught `tool_use` mechanism (restaurant/kitchen-order analogy: Claude requests, your code executes) and the four-part checklist for good tool descriptions (what it returns, input format/examples, edge cases, when-to-use-vs-alternatives), plus the built-in-tools-vs-MCP-tools competition problem. Hands-on: learner rewrote `analyze_content`/`analyze_document` descriptions with strong bidirectional mutual-exclusion framing (unaided); feedback given on making "what it returns" and edge cases concrete rather than vague. |
+| 2026-09-16 | L3 | Taught `tool_use` mechanism (restaurant/kitchen-order analogy: Claude requests, your code executes) and the four-part checklist for good tool descriptions (what it returns, input format/examples, edge cases, when-to-use-vs-alternatives), plus the built-in-tools-vs-MCP-tools competition problem. Hands-on: learner rewrote `analyze_content`/`analyze_document` descriptions with strong bidirectional mutual-exclusion framing (unaided); feedback given on making "what it returns" and edge cases concrete rather than vague. Learner then asked for the fully-fixed ideal version — captured below in section 6 as a standing reference. |
+
+---
+
+## 6. Worked Reference Examples
+
+Concrete "gold standard" examples produced during lessons, kept here for quick pre-exam
+revision (separate from the log so they're easy to skim without wading through narrative notes).
+
+### 6.1 Tool description checklist, applied (from L3)
+
+Checklist: (1) what it does + concrete returns, (2) input format/example values, (3) edge
+cases, (4) when to use vs. the alternative — bidirectionally.
+
+```json
+{
+  "name": "analyze_content",
+  "description": "Analyzes a short pasted text snippet (a sentence to a few paragraphs — NOT a full document like a PDF, Word file, or spreadsheet). Returns a JSON object with: sentiment (one of 'positive', 'negative', 'neutral'), and keywords (a list of up to 10 top keywords/phrases). If the input is empty or contains no meaningful text, returns sentiment: 'neutral' and an empty keywords list rather than an error. Do NOT use this for uploaded files or documents with structure (tables, headings, multiple sections) — use analyze_document for those instead; this tool has no concept of document structure and will silently ignore it.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "The raw text snippet to analyze, e.g. 'The new update is fantastic but the UI feels cluttered.'"
+      }
+    },
+    "required": ["text"]
+  }
+}
+```
+
+```json
+{
+  "name": "analyze_document",
+  "description": "Analyzes a full uploaded document (PDF, Word, or Excel file) that has real structure — multiple sections, headings, tables, or appendices. Returns a JSON object with: section_headings (ordered list of detected headings), tables (list of extracted tables as arrays of rows), and summary (a 2-3 sentence overview). If the document has no detectable headings or tables (e.g. a single block of unstructured text), returns empty lists for those fields rather than failing. Do NOT use this for short pasted text snippets with no file/structure — use analyze_content instead; running this on a one-paragraph snippet wastes a call and returns mostly empty fields.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "ID of the previously uploaded document, e.g. 'doc_8f3a1c'"
+      }
+    },
+    "required": ["file_id"]
+  }
+}
+```
+
+**Why this is the gold standard:** returns are named fields with types (not "a summary of
+insights"); edge cases resolve to a defined default instead of an error, so the agent doesn't
+retry wildly or hallucinate; and the "when to use vs. the other tool" sentence is written in
+*both* descriptions, not just one.

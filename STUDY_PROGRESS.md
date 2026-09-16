@@ -53,7 +53,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 - [x] L0. Exam overview: format, scoring, 5 domains, 8 scenarios — 2026-09-16
 
 ### Module 1 — Claude API Fundamentals (Guide Ch.1–2)
-- [ ] L1. API request structure, message roles, `stop_reason`
+- [x] L1. API request structure, message roles, `stop_reason` — 2026-09-16
 - [ ] L2. System prompt & the context window (lost-in-the-middle, tool-result bloat)
 - [ ] L3. Tools & `tool_use` — what it is, writing good tool descriptions
 - [ ] L4. `tool_choice` + JSON schemas for structured output
@@ -112,11 +112,16 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 
 ## 4. Handover state (read this first in any new session)
 
-- **Last completed:** L0 — Orientation (exam format, domains, scenarios).
-- **Next up:** L1 — API request structure, message roles, `stop_reason`.
-- **Learner notes so far:** none yet — first real lesson hasn't happened.
+- **Last completed:** L1 — API request structure, message roles, `stop_reason`.
+- **Next up:** L2 — System prompt & the context window (lost-in-the-middle, tool-result bloat).
+- **Learner notes so far:** Learns fast and reasons well from first principles (correctly
+  spotted the `"role": "tool"` bug on the first try, and independently reasoned toward *why*
+  no `tool` role exists — landed near "keeps conversation flow intact," which is adjacent to
+  the real answer about strict two-party turn alternation enabling prompt caching). Comfortable
+  with JSON. Keep hands-on exercises code/JSON-based rather than purely conceptual — that's
+  where the engagement is highest.
 - **Known weak spots to revisit before the exam:** none identified yet.
-- **Continue by saying:** "Let's pick up at L1" (or just say "continue") and teaching it per
+- **Continue by saying:** "Let's pick up at L2" (or just say "continue") and teach it per
   the style contract in section 2 — analogy, then mechanism, then a small hands-on check.
 
 ---
@@ -126,3 +131,4 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done (with date)
 | Date | Lesson(s) | Notes |
 |---|---|---|
 | 2026-09-16 | L0 | Tracker created. Repo explored: guide_en.md (~2600 lines) is the canonical English study guide with Part I (13 theory chapters), Part II (5 exam domains), worked questions, and a practice test. Plan of 36 bite-sized lessons drafted above. |
+| 2026-09-16 | L1 | Taught request structure (stateless "actor with amnesia" analogy), message roles, why `tool_result` lives in a `user` message, and `stop_reason` values. Hands-on: learner found the `"role": "tool"` bug in a broken JSON snippet unaided, then reasoned about *why* Anthropic didn't add a `tool` role (close to correct: landed on "keeps the exchange intact" vs. actual answer of strict two-party alternation enabling prompt caching). |
